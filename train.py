@@ -141,36 +141,35 @@ def get_or_build_tokenizer(config, ds):
     return tokenizer
 
 def get_ds(config):
-    # It only has the train split, so we divide it overselves
-    ds_raw = load_dataset(f"{config['datasource']}", split='train')
+    # Load dataset
+    ds_raw = load_dataset(config['datasource'], split='train')
 
-    # Build tokenizers
-    # tokenizer = get_or_build_tokenizer(config, ds_raw)
-    tokenizer = tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-    
+    # Initialize BERT tokenizer
+    tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
-    # Keep 90% for training, 10% for validation
+    # Split dataset into train and validation
     train_ds_size = int(0.9 * len(ds_raw))
     val_ds_size = len(ds_raw) - train_ds_size
     train_ds_raw, val_ds_raw = random_split(ds_raw, [train_ds_size, val_ds_size])
 
+    # Instantiate datasets
     train_ds = TextToSQLDataset(train_ds_raw, tokenizer, config['seq_len'])
     val_ds = TextToSQLDataset(val_ds_raw, tokenizer, config['seq_len'])
 
-    # Find the maximum length of each sentence in the source and target sentence
+    # Calculate maximum sequence lengths
     max_len_src = 0
     max_len_tgt = 0
 
     for item in ds_raw:
-        src_ids = tokenizer.encode(item['schema'] + " " + item['question'] + " " +  item['query']).ids
-        tgt_ids = tokenizer.encode(item['schema'] + " " + item['question'] + " " +  item['query']).ids
+        src_ids = tokenizer.encode(item['schema'] + " " + item['question'] + " " + item['query'], padding='max_length', truncation=True, max_length=config['seq_len'], return_tensors='pt').input_ids
+        tgt_ids = tokenizer.encode(item['schema'] + " " + item['question'] + " " + item['query'], padding='max_length', truncation=True, max_length=config['seq_len'], return_tensors='pt').input_ids
         max_len_src = max(max_len_src, len(src_ids))
         max_len_tgt = max(max_len_tgt, len(tgt_ids))
 
     print(f'Max length of source sentence: {max_len_src}')
     print(f'Max length of target sentence: {max_len_tgt}')
-    
 
+    # Create dataloaders
     train_dataloader = DataLoader(train_ds, batch_size=config['batch_size'], shuffle=True)
     val_dataloader = DataLoader(val_ds, batch_size=1, shuffle=True)
 
