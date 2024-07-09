@@ -5,14 +5,14 @@ from torch.utils.data import DataLoader, Dataset
 from transformers import BertTokenizer, BertModel
 import pandas as pd
 import random
-from typing import List, Tuple
+from typing import Tuple
 import re
 
 class TextToSQLDataset(Dataset):
-    def __init__(self, data: List[Tuple[str, str, str]], tokenizer, max_length=128):
+    def __init__(self, data, tokenizer, max_seq_len):
         self.data = data
         self.tokenizer = tokenizer
-        self.max_length = max_length
+        self.max_length = max_seq_len
 
     def __len__(self):
         return len(self.data)
