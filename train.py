@@ -19,6 +19,7 @@ from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
 from tokenizers.trainers import WordLevelTrainer
 from tokenizers.pre_tokenizers import Whitespace
+from transformers import AutoTokenizer
 
 import torchmetrics
 from torch.utils.tensorboard import SummaryWriter
@@ -144,7 +145,8 @@ def get_ds(config):
     ds_raw = load_dataset(f"{config['datasource']}", split='train')
 
     # Build tokenizers
-    tokenizer = get_or_build_tokenizer(config, ds_raw)
+    # tokenizer = get_or_build_tokenizer(config, ds_raw)
+    tokenizer = tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
     
 
     # Keep 90% for training, 10% for validation

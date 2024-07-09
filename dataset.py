@@ -25,8 +25,8 @@ class TextToSQLDataset(Dataset):
         src = f"{question} {schema}"
         tgt = sql
         
-        src_encoding = self.tokenizer.encode(src, padding='max_length', truncation=True, max_length=self.max_length, return_tensors='pt')
-        tgt_encoding = self.tokenizer.encode(tgt, padding='max_length', truncation=True, max_length=self.max_length, return_tensors='pt')
+        src_encoding = self.tokenizer(src, padding='max_length', truncation=True, max_length=self.max_length, return_tensors='pt')
+        tgt_encoding = self.tokenizer(tgt, padding='max_length', truncation=True, max_length=self.max_length, return_tensors='pt')
         
         return {
             'src_input_ids': src_encoding['input_ids'].squeeze(),
